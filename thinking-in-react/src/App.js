@@ -1,5 +1,14 @@
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
+
+
+/**
+ * Overall approach in writing React:
+ * 1. Finish a static version in OOP style
+ * 2. Decide what are states and what are props 
+ * 3. Decide where should states be put inside, and add more parameters
+ * 4. Define dataFlow functions/attributes (e.g. onChange=onSearchTextChange)
+ */
 
 /**
  * Website Structure:
@@ -19,40 +28,47 @@ const PRODUCTS = [
   { category: "Vegetables", price: "$1", stocked: true, name: "Peas" }
 ]
 
-
-function SearchBar() {
+function SearchBar({searchText, isInStockOnly, onSearchTextChange, onInStockOnlyChange}) {
   return (
     <form id="form"> 
-      <input type="search" id="query" name="q" placeholder="Search..." />
+      <input type="search" id="query" value={searchText} placeholder="Search..." 
+        onChange={(e) => onSearchTextChange(e.target.value)}
+      />
       <br/>
       <label>
-        <input type="checkbox" />
+        <input type="checkbox" checked={isInStockOnly} 
+          onChange={(e) => onInStockOnlyChange(e.target.checked)}
+        />
         Only show products in stock
       </label>
     </form>
   )
 }
 
-
-function ProductTable({products}) {
+function ProductTable({products, searchText, isInStockOnly}) {
   let rows = []
   let prevCategory = null;
-  /** Write an algorithm (write a loop) for the rows */
   for (const product of products) {
-    /**  Generate a new category if needed */
+    if (
+      product.name.toLowerCase().indexOf(
+        searchText.toLowerCase()
+      ) === -1
+    ) {
+      continue;
+    }
+    if (!product.stocked && isInStockOnly) {
+      continue;
+    }
     if (product.category !== prevCategory) {
       rows.push(
-        <ProductCategoryRow category={product.category}/>
+        <ProductCategoryRow key={product.category} category={product.category}/>
       );
       prevCategory = product.category;
     }
-    /** Generate the products line by line */
     rows.push(
-      <ProductRow product={product} />
+      <ProductRow key={product.name} product={product} />
     );
   }
-  
-
   return (
     <table>
       <thead>
@@ -66,39 +82,40 @@ function ProductTable({products}) {
   )
 }
 
-
 function ProductCategoryRow({category}) {
   return (
     <tr>
-    <th >
-      {category}
-    </th>
+    <th colSpan="2">{category}</th>
   </tr>
   )
-
 }
-
 
 function ProductRow({product}) {
   const name = (product.stocked) ? product.name : <span style={{color: 'red'}}>{product.name}</span>
   return (
     <tr>
-    <td >
-      {name}
-    </td>
-    <td >
-      {product.price}
-    </td>
+    <td>{name}</td>
+    <td>{product.price}</td>
   </tr>
   )
 }
 
-
 function FilterableProductTable({products}) {
+  const [searchText, setSearchText] = useState('');
+  const [isInStockOnly, setIsInStockOnly] = useState(false);
   return (
     <div>
-      <SearchBar />
-      <ProductTable products={products}/>
+      <SearchBar 
+        searchText={searchText} 
+        isInStockOnly={isInStockOnly} 
+        onSearchTextChange={setSearchText} 
+        onInStockOnlyChange={setIsInStockOnly}
+      />
+      <ProductTable 
+        products={products} 
+        searchText={searchText} 
+        isInStockOnly={isInStockOnly}
+      />
     </div>
   );
 }
