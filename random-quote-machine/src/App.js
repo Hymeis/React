@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import _ from 'lodash';
+import { MuiThemeProvider, createTheme } from '@mui/material/styles';
+import '@fontsource/roboto/700.css';
+import Box from '@mui/material/Box';
 import './App.css';
-import Button from './components/Button';
+
 import QuoteMachine from './components/QuoteMachine'
+import { ThemeProvider } from '@emotion/react';
 
 function App() {
   const [quotes, setQuotes] = useState([]);
   const [quote, setQuote] = useState({quote: "Click to get your random quote!", author: "uwu"});
-
+  const THEME = createTheme({
+    typography: {
+     "fontFamily": `"Roboto", "Helvetica", "Arial", sans-serif`,
+     "fontSize": 14,
+     "fontWeightLight": 300,
+     "fontWeightRegular": 400,
+     "fontWeightMedium": 500
+    }
+ });
   useEffect(() => {
     async function fetchQuotes() {
       try {
@@ -29,9 +41,16 @@ function App() {
   }
 
   return (
-    <div className="App" id="quote-box">
-      <QuoteMachine quote={quote} nextQuoteClickHandler={nextQuoteClickHandler} classname='App'/>
-    </div>
+    <ThemeProvider theme={THEME}>
+      <Box className="App" id="quote-box" sx={{
+        backgroundColor: "#C1F7DC",
+        backgroundRepeat: "no-repeat",
+        height: "100vh",
+        width: "100vw"
+      }}>
+        <QuoteMachine quote={quote} nextQuoteClickHandler={nextQuoteClickHandler}/>
+      </Box>
+    </ThemeProvider>
   );
 }
 
